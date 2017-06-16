@@ -31,11 +31,7 @@
     <types>
         <members>*</members>
         <name>ApprovalProcess</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>AssignmentRules</name>
-    </types>
+    </types>    
     <types>
         <members>*</members>
         <name>AuraDefinitionBundle</name>
@@ -132,11 +128,7 @@
     <types>
         <members>*</members>
         <name>EntitlementTemplate</name>
-    </types>
-    <types>
-        <members>Case</members>
-        <name>EscalationRules</name>
-    </types>
+    </types>    
     <types>
         <members>*</members>
         <name>ExternalDataSource</name>
@@ -268,10 +260,6 @@
     <types>
         <members>*</members>
         <name>Workflow</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>Settings</name>
-    </types>
+    </types>    
     <version>39.0</version>
 </Package>
