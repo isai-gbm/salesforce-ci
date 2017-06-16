@@ -75,7 +75,7 @@
       <sf:deploy username="${propfile.uat.sf.username}" 
         password="${propfile.uat.sf.password}" 
         serverurl="${propfile.test.sf.serverurl}" 
-        zipFile="${propfile.uat.sf.zip.package}" 
+        deployRoot="src" 
         testLevel="RunLocalTests"
         logType="Detail"        
         pollWaitMillis="1000"/>
