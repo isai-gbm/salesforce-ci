@@ -1,0 +1,127 @@
+<apex:component id="image-container" layout="block">        
+    <div class="slds-form-element" id="image-form">
+        <div class="slds-form-element__control">
+            <figure class="slds-image slds-image--card">
+                <a href="javascript:void(0);" class="slds-image__crop slds-image__crop--16-by-9">
+                    <img id="imgFile"/>
+                </a>
+                <div class="slds-button-group slds-image__actions" role="group"> 
+                    <div class="" ass="slds-file-selector">
+                        <input class="slds-file-selector__input slds-assistive-text" accept="image/*" type="file" id="file-upload-image" onchange="fileChooser.chooseImage()" />
+                        <label class="slds-file-selector__body" for="file-upload-image">                                
+                            <span  class="slds-file-selector__button slds-button slds-button--icon-border-filled">   
+                            <svg class="slds-button__icon slds-button__icon--right" aria-hidden="true">
+                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.GBM_SLDS,'/assets/icons/utility-sprite/svg/symbols.svg#image')}"></use>
+                    </svg>
+                            </span>                                
+                        </label>
+                    </div>            
+                </div>
+                <figcaption class="slds-image__title slds-image__title--card" style="background:#dde0e4">
+                    <span class="slds-icon_container slds-m-right--x-small" title="image">
+                        <svg class="slds-icon slds-icon_x-small" aria-hidden="true">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.GBM_SLDS,'/assets/icons/doctype-sprite/svg/symbols.svg#image')}"></use>
+                        </svg>                                     
+                        <span class="slds-assistive-text">image</span>
+                    </span>
+                    <span class="slds-image__text slds-truncate" id="file-name"/>
+                </figcaption>
+            </figure>                                           
+        </div>
+        <div class="slds-form-element__help" id="error-upload"></div>
+    </div>
+        <button class="slds-button slds-button--neutral" id="save-upload" disabled="true">
+            <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
+            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.GBM_SLDS,'/assets/icons/utility-sprite/svg/symbols.svg#upload')}"></use>
+            </svg>
+            Guardar
+        </button>   
+        <button class="slds-button slds-button--neutral" id ="cancel-upload" >
+            <svg class="slds-button__icon slds-button__icon_left" id="cancel-upload"  aria-hidden="true">
+            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="{!URLFOR($Resource.GBM_SLDS,'/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>
+            </svg>
+            Cancelar
+        </button>
+    <script>
+        var fileChooser = function() {
+
+            var fileUpload = {
+                fileName : '',
+                base64data : '',                
+            };
+
+            var CONSTANTS  = {
+                MAX_FILE_SIZE: 4194304,
+                CHUNK_SIZE: 950000,
+                INPUT : 'file-upload-image',
+                IMAGE_PREVIEW : 'imgFile',
+                ERROR : '#error-upload',
+                IMAGE_FORM : '#image-form',
+                SAVE_BUTTON: '#save-upload',
+                FILE_NAME: '#file-name'
+            };
+
+            function setError(message) {
+                $(CONSTANTS.IMAGE_FORM).addClass('slds-has-error');
+                $(CONSTANTS.ERROR).html(message);
+            }
+            
+            function chooseImage (){
+                var file = document.getElementById(CONSTANTS.INPUT).files[0];               
+                var imgFile = document.getElementById(CONSTANTS.IMAGE_PREVIEW);
+                
+                $(CONSTANTS.IMAGE_FORM).removeClass('slds-has-error');
+                $(CONSTANTS.ERROR).html('');    
+
+                if (!file){
+                    return ;
+                }           
+
+                if (file.size > CONSTANTS.MAX_FILE_SIZE){
+                    $(CONSTANTS.IMAGE_FORM).addClass('slds-has-error');
+                    $(CONSTANTS.ERROR).html('La imagen excede el tamaño de 4 MB permitidos');                   
+                    return;
+                }
+                if (!file.type.includes('image')){
+                    $(CONSTANTS.IMAGE_FORM).addClass('slds-has-error');
+                    $(CONSTANTS.ERROR).html('Solo archivos de imagen son soportados');
+                    return;
+                }   
+
+                var fr = new FileReader();
+                fr.onload = function (){    
+                    fileUpload.fileName = file.name;
+                    fileUpload.base64data = fr.result;                          
+                    imgFile.src = fr.result; 
+                    imgFile.onload = function() {
+                        var img = this;                     
+                        $(CONSTANTS.SAVE_BUTTON).removeAttr('disabled');
+                        $(CONSTANTS.FILE_NAME).html(file.name);
+
+                    }
+                }
+
+                if (file){
+                    fr.readAsDataURL(file);                
+                }
+            };      
+
+            function clearChooser() {
+                $(CONSTANTS.SAVE_BUTTON).attr('disabled',true);
+                $(CONSTANTS.FILE_NAME).html('');
+                var imgFile = document.getElementById(CONSTANTS.IMAGE_PREVIEW);
+                imgFile.src = '';   
+                $(CONSTANTS.IMAGE_FORM).removeClass('slds-has-error');
+                $(CONSTANTS.ERROR).html('');    
+            };          
+            
+            return {
+                chooseImage : chooseImage,
+                clearChooser : clearChooser,
+                File:fileUpload,
+                setError : setError             
+            }
+        }();                
+    </script>  
+    
+</apex:component>
