@@ -3,6 +3,7 @@ public class Documents {
     public Boolean uploaded {get;set;}    
     public DocumentByFolio documentByFolio {get;set;}
     public String Id {get;set;}
+    public String Status {get;set;}
     public Integer documentType;
         
     public enum DocumentType{
