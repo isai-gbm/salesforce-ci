@@ -1,0 +1,172 @@
+<apex:page showHeader="false" applyBodyTag="false" standardStylesheets="false"  applyHtmlTag="false" docType="html-5.0" controller="UploadFiles_cls">   
+    <html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <head>
+             <meta charset="utf-8" />
+             <meta http-equiv="x-ua-compatible" content="ie=edge" />
+             <apex:stylesheet value="{!URLFOR($Resource.GBM_SLDS,'assets/styles/salesforce-lightning-design-system-vf.css')}" />    
+             <apex:includeScript value="{!$Resource.jquery}"/>                  
+        </head>
+        <script>        
+            function getParameterByName(name) {
+                var url = window.top.location.href;
+                name = name.replace(/[\[\]]/g, "\\$&");
+                var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                    results = regex.exec(url);
+                if (!results) return null;
+                if (!results[2]) return '';
+                return decodeURIComponent(results[2].replace(/\+/g, " "));
+            }           
+        </script>  
+        <body>
+            <div class="GBM">                                                   
+                <div class="slds-grid slds-wrap slds-grid--pull-padded slds-is-relative">                   
+                    <div class="slds-spinner_container" id="loading" style="display: none">
+                        <div role="status" class="slds-spinner slds-spinner--medium slds-spinner--brand">
+                            <span class="slds-assistive-text">Loading</span>
+                            <div class="slds-spinner__dot-a"></div>
+                            <div class="slds-spinner__dot-b"></div>
+                        </div>
+                    </div>  
+                    <div class="slds-p-horizontal--small slds-size--1-of-1 slds-align--absolute-center">
+                        <div style="width:35rem;">                          
+                            <c:SelectFilesUpload documents="{!listDocuments}" />
+                        </div>
+                    </div>
+                    <div class="slds-p-horizontal--small slds-size--1-of-1 slds-align--absolute-center">
+                        <div style="width:35rem;">
+                            <c:UploadFiles />
+                        </div>
+                    </div>
+                </div>              
+            </div>          
+        </body>     
+        <script type="text/javascript">
+            var RemoteActions = function (){
+                function getFileId (objectId,callback){
+                    Visualforce.remoting.Manager.invokeAction ('{!JSENCODE($RemoteAction.UploadFiles_cls.getFileId)}',objectId,callback);
+                };              
+                
+                function uploadFile (filename,base64data,objectId,documentType,callback){
+                   
+                };
+                return {
+                    uploadFile: uploadFile,
+                    getFileId: getFileId
+                }
+            }();            
+
+            var ui = function (){
+                var ELEMENTS = {
+                    LOADING : '#loading'
+                };
+
+                function showElement(flag, element) {
+                    if (flag)
+                        $(element).show();
+                    else
+                        $(element).hide();
+
+                };
+
+                return {
+                    ELEMENTS : ELEMENTS,
+                    showElement : showElement
+                }
+            }();                
+
+            var controller = function (){
+                var documents;              
+
+                var documentToUpload = {
+                    objectId : '',                  
+                    documentType : 0,
+
+                }       
+
+                function selectDocumentsToUpload (checkbox){
+                    var documentId =  $(checkbox).attr('id');
+                    $.each (documents,function(index,document){
+                        if (documentId == document.Id){
+                            documentToUpload.documentType = document.documentType;                                                      
+                            return;
+                        }                                           
+                    });
+                };                              
+
+                function loadFiles (){
+                    documentToUpload.objectId = getParameterByName('id');               
+                    RemoteActions.getFileId(documentToUpload.objectId,function(response,event) {
+                        if (event.type !== 'exception' && response.success){
+                            documents = response.documents;
+                            if (!response.documents.hasOwnProperty('hasUploadedDocuments')){
+                                $.each (response.documents,function(index,document){
+                                    $(document.Id).attr('disabled',true);
+                                });
+                            }                           
+                        }else{
+                            console.log('Error',response,event);
+                        }
+                    });
+                    
+                };
+
+
+                function save (){                   
+
+                    if ($('[id^="radiobutton-document-"]:checked').length === 0){
+                        fileChooser.setError('Elija un tipo de documento a subir');
+                        return;
+                    }
+
+                    ui.showElement(true,ui.ELEMENTS.LOADING);
+                    RemoteActions.uploadFile(fileChooser.File.fileName,fileChooser.File.base64data,documentToUpload.objectId,documentToUpload.documentType,function(response,event){
+                        ui.showElement(false,ui.ELEMENTS.LOADING);
+
+                        if (event.type !== 'exception' && response.success){
+                            console.log('success',response.success);
+                            fileChooser.clearChooser();
+                            
+                        }else{
+                            console.log('Error',response,event);
+                            if (response.errorCode === 1141){
+                                fileChooser.setError(response.errorMessage);
+                            }else{
+                                fileChooser.setError('Ha ocurrido el siguient error: '+response.errorCode +'. Favor de contactar al Administrdor del Sistema');
+                            }
+                        }
+                    });
+                };
+
+                function cancel (){
+                    var Id = getParameterByName('id');      
+                    var url = window.top.location.origin+='/'+Id;
+                    window.top.location.href = url;
+                };
+
+                return {
+                    loadFiles: loadFiles,
+                    save : save,
+                    selectDocumentsToUpload : selectDocumentsToUpload,
+                    cancel : cancel
+                }
+            }();
+
+            $(function() {
+                controller.loadFiles();
+                $('[id^="radiobutton-document-"]').change(function(){
+                    controller.selectDocumentsToUpload(this);
+                });
+                
+                $('#save-upload').on( "click", function() {
+                    controller.save();
+                });
+
+                $('#cancel-upload').on( "click", function() {
+                    controller.cancel();
+                });
+                
+
+            });
+        </script>
+    </html>
+</apex:page>

@@ -1,0 +1,18 @@
+<apex:component layout="block">
+    <apex:attribute name="documents" type="Documents[]" description=""  />  
+    <fieldset class="slds-form-element">
+      <legend class="slds-form-element__legend slds-form-element__label">Documentos a subir</legend>
+      <div class="slds-form-element__control">
+        <div class="slds-radio--button-group">
+            <apex:repeat value="{!documents}" var="document">                   
+                <span class="slds-button slds-radio--button">
+                    <input type="radio" id="{!document.Id}" name="radio"/>
+                    <label class="slds-radio--button__label" for="{!document.Id}">
+                        <span class="slds-radio--faux">{!document.label}</span>
+                    </label>
+                </span>                     
+            </apex:repeat>
+        </div>
+      </div>
+    </fieldset> 
+</apex:component>

@@ -75,7 +75,7 @@
       <sf:deploy username="${propfile.uat.sf.username}" 
         password="${propfile.uat.sf.password}" 
         serverurl="${propfile.test.sf.serverurl}" 
-        zipFile="${propfile.uat.sf.zip.package}" 
+        deployRoot="src" 
         testLevel="RunLocalTests"
         logType="Detail"        
         pollWaitMillis="1000"/>
@@ -94,10 +94,11 @@
     
     <!-- Shows deploying code & running tests for code in directory -->
     <target name="production">      
+      <echo message="Deploying using usr=${personalPropsFile.sf.username} svrurl=${propfile.test.sf.serverurl} zipFile=${propfile.production.sf.zip.package}"/>
       <sf:deploy username="${propfile.production.sf.username}" 
         password="${propfile.production.sf.password}" 
         serverurl="${propfile.production.sf.serverurl}" 
-        zipFile="${propfile.production.sf.zip.package}" 
+        zipFile="deploy\\production\\install\\SFPACKAGEINSTALL.zip" 
         testLevel="RunLocalTests"
         logType="Detail"
         pollWaitMillis="1000">      	 
@@ -128,13 +129,13 @@
     </target>		 
 	 
     <!-- Target for remove components -->
-    <target name="rollback">
-      <!-- Upload the contents of the "codepkg" directory, running the tests for just 1 class -->
+    <target name="rollback">            
       <sf:deploy username="${propfile.production.sf.username}" 
         password="${propfile.production.sf.password}" 
         serverurl="${propfile.production.sf.serverurl}" 
-        zipFile="${propfile.production.sf.zip.package}" 
+        zipFile="\\deploy\\production\\uninstall\\SFPACKAGEUNINSTALL.zip" 
         testLevel="RunLocalTests"
+        purgeOnDelete ="true"
         logType="Detail">        
       </sf:deploy>
     </target>        
